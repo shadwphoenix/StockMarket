@@ -3,12 +3,11 @@
     public class StockMarketProcessor
     {
 
-        long lastOrderId;
+        private long lastOrderId;
 
-        public StockMarketProcessor()
+        public StockMarketProcessor(long lastOrderId = 0)
         {
-            lastOrderId = 0;
-            //this is a test push!
+            this.lastOrderId = lastOrderId;
         }
 
         public void EnqueueOrder(TradeSide side, decimal quantity, decimal price)
