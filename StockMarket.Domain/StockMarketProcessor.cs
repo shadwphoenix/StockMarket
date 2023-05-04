@@ -82,5 +82,7 @@
                 buyOrders.Enqueue(order, order);
             }
         }
+
+        private void MakeTrade()
     }
 }
