@@ -1,4 +1,6 @@
+using FluentAssertions;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace StockMarket.Domain.Test
 {
@@ -11,17 +13,54 @@ namespace StockMarket.Domain.Test
             //Arrange
 
             var sut = new StockMarketProcessor();// sut = System Under Test
-            sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
+            var BuyOrderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
 
             //Act
 
-            sut.EnqueueOrder(side: TradeSide.Sell, quantity: 2, price: 1400);
+            var SellOrderId = sut.EnqueueOrder(side: TradeSide.Sell, quantity: 2, price: 1400);
+
+            //Assert
+
+            Assert.Equal(2, sut.Orders.Count());
+            sut.Orders.First().Should().BeEquivalentTo(new
+            {
+                Side = TradeSide.Buy,
+                Quantity = 0M,
+                Price = 1500M
+            });
+            sut.Orders.Skip(1).First().Should().BeEquivalentTo(new
+            {
+                Side = TradeSide.Sell,
+                Quantity = 1M,
+                Price = 1400M
+            });
+
+            Assert.Single(sut.Trades);
+            sut.Trades.First().Should().BeEquivalentTo(new
+            {
+                Quantity = 1,
+                Price = 1400,
+                sellOrderId = SellOrderId,
+                buyOrderId = BuyOrderId
+            });
+        }
+
+        [Fact]
+        public void EnqueueOrder_Should_Process_BuyOrder_When_SellOrder_Is_Already_Enqueued_Test()
+        {
+            //Arrange
+
+            var sut = new StockMarketProcessor();
+            sut.EnqueueOrder(side: TradeSide.Sell, quantity: 1, price: 1400);
+
+            //Act
+
+            sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
 
             //Assert
 
             Assert.Equal(2, sut.Orders.Count());
             Assert.Single(sut.Trades);
-
         }
 
         [Fact]

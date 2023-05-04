@@ -2,17 +2,20 @@
 {
     public class Trade
     {
-        internal Trade(long idSell, long idBuy, decimal tradeQuantity, decimal price)
+        internal Trade(long tradeId, long idSell, long idBuy, decimal tradeQuantity, decimal price)
         {
-            IdSell = idSell;
-            IdBuy = idBuy;
-            TradeQuantity = tradeQuantity;
+            sellOrderId = idSell;
+            buyOrderId = idBuy;
+            Quantity = tradeQuantity;
             Price = price;
+            Id = tradeId;
         }
 
-        public long IdSell { get; }
+        public long sellOrderId { get; }
+        private long buyOrderId { get; }
         public long IdBuy { get; }
-        public decimal TradeQuantity { get; }
+        public decimal Quantity { get; }
         public decimal Price { get; }
+        public long Id { get; }
     }
 }

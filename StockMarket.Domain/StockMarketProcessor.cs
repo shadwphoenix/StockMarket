@@ -4,6 +4,7 @@
     {
 
         private long lastOrderId;
+        private long lastTradeId;
         private readonly PriorityQueue<Order, Order> buyOrders;
         private readonly PriorityQueue<Order, Order> sellOrders;
         private readonly List<Trade> trades;
@@ -12,77 +13,71 @@
         private readonly List<Order> orders;
         public IEnumerable<Order> Orders => orders;
 
-        public StockMarketProcessor(long lastOrderId = 0)
+        public StockMarketProcessor(long lastOrderId = 0, long lastTradeId = 0)
         {
             this.lastOrderId = lastOrderId;
-            buyOrders = new PriorityQueue<Order, Order>(new MaxComparer());
-            sellOrders = new PriorityQueue<Order, Order>(new MinComparer());
-            trades = new List<Trade>();
-            orders = new List<Order>();
-
+            this.lastTradeId = lastTradeId;
+            buyOrders = new(new MaxComparer());
+            sellOrders = new(new MinComparer());
+            trades = new();
+            orders = new();
         }
 
-        public void EnqueueOrder(TradeSide side, decimal quantity, decimal price)
+        public long EnqueueOrder(TradeSide side, decimal quantity, decimal price)
         {
             Interlocked.Increment(ref lastOrderId);
             Order order = new(lastOrderId, side, quantity, price);
             orders.Add(order);
             if (side == TradeSide.Buy)
             {
-                ProcessBuyOrder(order);
+                matchOrder(sellOrders, buyOrders, order, (price1, price2) => price1 >= price2);
+
             }
             else
             {
-                ProcessSellOrder(order);
+                matchOrder(sellOrders, buyOrders, order, (price1, price2) => price1 < price2);
             }
+            return order.Id;
+        }
+        private void makeTrade(Order order1, Order order2)
+        {
+            var minQuantity = Math.Min(order1.Quantity, order2.Quantity);
+            order1.DecreaseQuantity(minQuantity);
+            order2.DecreaseQuantity(minQuantity);
+
+            Interlocked.Increment(ref lastTradeId);
+
+            var matchingOrders = findOrders(order1, order2);
+
+            Trade trade = new Trade(lastTradeId, matchingOrders.SellOrder.Id, matchingOrders.BuyOrder.Id, minQuantity, order1.Price);
+
+            trades.Add(trade);
         }
 
-        private void ProcessSellOrder(Order order)
+        private void matchOrder(PriorityQueue<Order, Order> matchingOrders, PriorityQueue<Order, Order> Orders, Order order, Func<decimal, decimal, bool> comparePriceDelegate)
         {
-
-
-            while (buyOrders.Count > 0 && buyOrders.Peek().Price > order.Price && order.Quantity > 0)
+            while (matchingOrders.Count > 0 && comparePriceDelegate(matchingOrders.Peek().Price, order.Price) && order.Quantity > 0)
             {
-                Order peekBuyOrder = buyOrders.Peek();
-                var tradeQuantity = Math.Min(peekBuyOrder.Quantity, order.Quantity);
-                peekBuyOrder.DecreaseQuantity(tradeQuantity);
-                order.DecreaseQuantity(tradeQuantity);
-                Trade trade = new Trade(order.Id, peekBuyOrder.Id, tradeQuantity, order.Price);
-                trades.Add(trade);
-                if (peekBuyOrder.Quantity == 0)
+                Order peekTargetOrder = matchingOrders.Peek();
+                makeTrade(order, peekTargetOrder);
+
+                if (peekTargetOrder.Quantity == 0)
                 {
-                    buyOrders.Dequeue();
-                }
-            }
-
-            if (order.Quantity > 0)
-            {
-                sellOrders.Enqueue(order, order);
-            }
-        }
-
-        private void ProcessBuyOrder(Order order)
-        {
-
-            while (sellOrders.Count > 0 && sellOrders.Peek().Price < order.Price && order.Quantity > 0)
-            {
-                Order peekSellOrder = sellOrders.Peek();
-                var tradeQuantity = Math.Min(order.Quantity, order.Quantity);
-                peekSellOrder.DecreaseQuantity(tradeQuantity);
-                order.DecreaseQuantity(tradeQuantity);
-                Trade trade = new Trade(peekSellOrder.Id, order.Id, tradeQuantity, order.Price);
-                trades.Add(trade);
-                if (peekSellOrder.Quantity == 0)
-                {
-                    sellOrders.Dequeue();
+                    matchingOrders.Dequeue();
                 }
             }
             if (order.Quantity > 0)
             {
-                buyOrders.Enqueue(order, order);
+                Orders.Enqueue(order, order);
             }
         }
-
-        private void MakeTrade()
+        private static (Order SellOrder, Order BuyOrder) findOrders(Order order1, Order order2)
+        {
+            if (order1.Side == TradeSide.Buy)
+            {
+                return (order2, order1);
+            }
+            return (order1, order2);
+        }
     }
 }
