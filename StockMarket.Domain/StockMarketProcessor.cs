@@ -27,16 +27,16 @@
         {
             Interlocked.Increment(ref lastOrderId);
             Order order = new(lastOrderId, side, quantity, price);
-            orders.Add(order);
             if (side == TradeSide.Buy)
             {
-                matchOrder(sellOrders, buyOrders, order, (price1, price2) => price1 >= price2);
+                matchOrder(sellOrders, buyOrders, order, (price1, price2) => price1 <= price2);
 
             }
             else
             {
-                matchOrder(sellOrders, buyOrders, order, (price1, price2) => price1 < price2);
+                matchOrder(buyOrders, sellOrders, order, (price1, price2) => price1 >= price2);
             }
+            orders.Add(order);
             return order.Id;
         }
         private void makeTrade(Order order1, Order order2)
