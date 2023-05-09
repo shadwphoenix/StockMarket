@@ -49,7 +49,7 @@
 
             var matchingOrders = findOrders(order1, order2);
 
-            Trade trade = new Trade(lastTradeId, matchingOrders.SellOrder.Id, matchingOrders.BuyOrder.Id, minQuantity, order1.Price);
+            Trade trade = new Trade(lastTradeId, matchingOrders.SellOrder.Id, matchingOrders.BuyOrder.Id, minQuantity, matchingOrders.SellOrder.Price);
 
             trades.Add(trade);
         }
@@ -59,9 +59,13 @@
             while (matchingOrders.Count > 0 && comparePriceDelegate(matchingOrders.Peek().Price, order.Price) && order.Quantity > 0)
             {
                 Order peekTargetOrder = matchingOrders.Peek();
-                makeTrade(order, peekTargetOrder);
+                if (!peekTargetOrder.IsCanceled)
+                {
+                    makeTrade(order, peekTargetOrder);
 
-                if (peekTargetOrder.Quantity == 0)
+                }
+
+                if (peekTargetOrder.Quantity == 0 || peekTargetOrder.IsCanceled )
                 {
                     matchingOrders.Dequeue();
                 }
@@ -78,6 +82,15 @@
                 return (order2, order1);
             }
             return (order1, order2);
+        }
+
+        public void CancelOrder(long orderId)
+        {
+            foreach (Order order in orders)
+            {
+                if (order.Id == orderId)
+                    order.CancelOrder();
+            }
         }
     }
 }
