@@ -64,8 +64,8 @@ namespace StockMarket.Domain.Test
             Assert.Equal(2, sut.Orders.Count());
             Assert.Single(sut.Trades);
         }
-        [Fact]
 
+        [Fact]
         public void EnqueueOrder_Should_Process_SellOrder_With_The_Highest_Price_BuyOrder_Test()
         {
             //Arrange
@@ -91,7 +91,7 @@ namespace StockMarket.Domain.Test
         }
 
         [Fact]
-        public void EnqueueOrder_Should_Process_BuyOrder_With_Least_Price_SellOrder_Test()
+        public void EnqueueOrder_Should_Process_BuyOrder_With_Lowest_Price_SellOrder_Test()
         {
             //Arrange
             var sut = new StockMarketProcessor();
@@ -114,7 +114,6 @@ namespace StockMarket.Domain.Test
 
             });
         }
-
 
         [Fact]
         public void CancelOrder_Should_Cancel_Order_Test()
@@ -151,5 +150,47 @@ namespace StockMarket.Domain.Test
             Assert.Empty(sut.Trades);
         }
 
+        [Fact]
+        public void EnqueueOrder_Should_Not_Work_When_StockMarket_Is_Closed_Test()
+        {
+            //Arrange
+            var sut = new StockMarketProcessor();
+            sut.CloseMarket();
+
+            //Act
+            void act() => sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
+
+            //Assert
+            Assert.Throws<NotImplementedException>(act);
+        }
+
+        [Fact]
+        public void CancelOrder_Should_Not_Work_When_Stockmarket_Is_Closed_Test()
+        {
+            //Arrange
+            var sut = new StockMarketProcessor();
+            var order = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
+            sut.CloseMarket();
+
+            //Act
+            void act() => sut.CancelOrder(order);
+
+            //Assert
+            Assert.Throws<NotImplementedException>(act);
+        }
+        /*
+        [Fact]
+        public void Modify_Order_Price_And_Quantity_Test()
+        {
+            // buy order o sell order dare ke ba ham match nemishan baadesh
+            // yeki ro taghir mide ke ba ham badesh trade konan :))
+        }
+
+        [Fact]
+        public void Modify_Order_Should_Not_Work_When_StockMarket_Is_Closed()
+        {
+
+        }
+        */
     }
 }

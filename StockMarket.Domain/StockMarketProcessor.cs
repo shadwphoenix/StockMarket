@@ -1,18 +1,21 @@
-﻿namespace StockMarket.Domain
+﻿using StockMarket.Domain.MarketState;
+using System.Diagnostics;
+using System.Drawing;
+
+namespace StockMarket.Domain
 {
-    public class StockMarketProcessor
+    public class StockMarketProcessor : IStockMarketProcessor
     {
 
         private long lastOrderId;
         private long lastTradeId;
+        private MarketState.MarketState state;
         private readonly PriorityQueue<Order, Order> buyOrders;
         private readonly PriorityQueue<Order, Order> sellOrders;
         private readonly List<Trade> trades;
-        public IEnumerable<Trade> Trades => trades;
-
         private readonly List<Order> orders;
         public IEnumerable<Order> Orders => orders;
-
+        public IEnumerable<Trade> Trades => trades;
         public StockMarketProcessor(long lastOrderId = 0, long lastTradeId = 0)
         {
             this.lastOrderId = lastOrderId;
@@ -21,9 +24,35 @@
             sellOrders = new(new MinComparer());
             trades = new();
             orders = new();
+            state = new OpenState(this);
+        }
+        public long CancelOrder(long orderId) => state.CancelOrder(orderId);
+
+        public void CloseMarket()
+        {
+            state.CloseMarket();
         }
 
-        public long EnqueueOrder(TradeSide side, decimal quantity, decimal price)
+        public long EnqueueOrder(TradeSide side, decimal quantity, decimal price) => state.EnqueueOrder(side, quantity, price);
+        public void OpenMarket()
+        {
+            state.OpenMarket();
+        }
+        internal void Close()
+        {
+            state = new CloseState(this);
+        }
+        internal void Open()
+        {
+            state = new OpenState(this);
+        }
+        internal long Cancel(long orderId)
+        {
+            var order = orders.Single(o => o.Id == orderId);
+            order.CancelOrder();
+            return orderId;
+        }
+        internal long Enqueue(TradeSide side, decimal quantity, decimal price)
         {
             Interlocked.Increment(ref lastOrderId);
             Order order = new(lastOrderId, side, quantity, price);
@@ -81,11 +110,6 @@
             return (order1, order2);
         }
 
-        public void CancelOrder(long orderId)
-        {
-            var order = orders.Single(o => o.Id == orderId);
-            order.CancelOrder();
-        }
 
     }
 }
