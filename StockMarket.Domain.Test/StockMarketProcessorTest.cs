@@ -1,4 +1,5 @@
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
@@ -65,7 +66,7 @@ namespace StockMarket.Domain.Test
         }
         [Fact]
 
-        public void EnqueueOrder_Should_Process_SellOrder_With_The_Highest_Price_BuyOrder()
+        public void EnqueueOrder_Should_Process_SellOrder_With_The_Highest_Price_BuyOrder_Test()
         {
             //Arrange
             var sut = new StockMarketProcessor();
@@ -90,7 +91,7 @@ namespace StockMarket.Domain.Test
         }
 
         [Fact]
-        public void EnqueueOrder_Should_Process_BuyOrder_With_Least_Price_SellOrder()
+        public void EnqueueOrder_Should_Process_BuyOrder_With_Least_Price_SellOrder_Test()
         {
             //Arrange
             var sut = new StockMarketProcessor();
@@ -116,7 +117,7 @@ namespace StockMarket.Domain.Test
 
 
         [Fact]
-        public void CancelOrder_Should_Cancel_Order()
+        public void CancelOrder_Should_Cancel_Order_Test()
         {
             //Arrange
             var sut = new StockMarketProcessor();
@@ -136,18 +137,19 @@ namespace StockMarket.Domain.Test
         }
 
         [Fact]
-        public void CanceledOrder_Should_Not_Trade_With_Other_Order()
+        public void EnqueueOrder_Should_Not_Process_Order_When_Order_Is_Canceled_Test()
         {
             //Arrange
             var sut = new StockMarketProcessor();
             var canceledOrderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
+            sut.CancelOrder(canceledOrderId);
 
             //Act
-            sut.CancelOrder(canceledOrderId);
             sut.EnqueueOrder(side: TradeSide.Sell, quantity: 1, price: 1500);
 
             //Assert
             Assert.Empty(sut.Trades);
         }
+
     }
 }

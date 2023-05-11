@@ -59,21 +59,18 @@
             while (matchingOrders.Count > 0 && comparePriceDelegate(matchingOrders.Peek().Price, order.Price) && order.Quantity > 0)
             {
                 Order peekTargetOrder = matchingOrders.Peek();
-                if (!peekTargetOrder.IsCanceled)
-                {
-                    makeTrade(order, peekTargetOrder);
 
-                }
-
-                if (peekTargetOrder.Quantity == 0 || peekTargetOrder.IsCanceled )
+                if (peekTargetOrder.IsCanceled)
                 {
                     matchingOrders.Dequeue();
+                    continue;
                 }
+
+                makeTrade(order, peekTargetOrder);
+
+                if (peekTargetOrder.Quantity == 0) matchingOrders.Dequeue();
             }
-            if (order.Quantity > 0)
-            {
-                Orders.Enqueue(order, order);
-            }
+            if (order.Quantity > 0) Orders.Enqueue(order, order);
         }
         private static (Order SellOrder, Order BuyOrder) findOrders(Order order1, Order order2)
         {
@@ -86,11 +83,9 @@
 
         public void CancelOrder(long orderId)
         {
-            foreach (Order order in orders)
-            {
-                if (order.Id == orderId)
-                    order.CancelOrder();
-            }
+            var order = orders.Single(o => o.Id == orderId);
+            order.CancelOrder();
         }
+
     }
 }
