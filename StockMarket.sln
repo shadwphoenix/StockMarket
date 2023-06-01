@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockMarket.Domain.Test", "StockMarket.Domain.Test\StockMarket.Domain.Test.csproj", "{FDE920BA-CC81-424F-9C8B-E978C96B86D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StockMarket.Domain.Test", "StockMarket.Domain.Test\StockMarket.Domain.Test.csproj", "{FDE920BA-CC81-424F-9C8B-E978C96B86D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockMarket.Domain", "StockMarket.Domain\StockMarket.Domain.csproj", "{CE2D6D7A-C14C-4969-9582-6EB31AF82A9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StockMarket.Domain", "StockMarket.Domain\StockMarket.Domain.csproj", "{CE2D6D7A-C14C-4969-9582-6EB31AF82A9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockMarket.Data", "StockMarket.Data\StockMarket.Data.csproj", "{8BCAD24D-2E3D-4953-BA85-92B00F6E0755}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{CE2D6D7A-C14C-4969-9582-6EB31AF82A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE2D6D7A-C14C-4969-9582-6EB31AF82A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE2D6D7A-C14C-4969-9582-6EB31AF82A9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BCAD24D-2E3D-4953-BA85-92B00F6E0755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BCAD24D-2E3D-4953-BA85-92B00F6E0755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BCAD24D-2E3D-4953-BA85-92B00F6E0755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BCAD24D-2E3D-4953-BA85-92B00F6E0755}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

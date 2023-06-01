@@ -24,7 +24,7 @@ namespace StockMarket.Domain
             sellOrders = new(new MinComparer());
             trades = new();
             orders = new();
-            state = new OpenState(this);
+            state = new CloseState(this);
         }
         public long CancelOrder(long orderId) => state.CancelOrder(orderId);
 
@@ -38,6 +38,21 @@ namespace StockMarket.Domain
         {
             state.OpenMarket();
         }
+
+        public long ModifyOrder(long orderId, decimal quantity, decimal price)
+        {
+           return state.ModifyOrder(orderId,quantity, price);
+        }
+
+
+        internal long Modify(long orderId, decimal quantity, decimal price)
+        {
+            var order = orders.Single(o => o.Id == orderId);
+            order.CancelOrder();
+            var newId = Enqueue(order.Side, quantity, price);
+            return newId;
+        }
+
         internal void Close()
         {
             state = new CloseState(this);
@@ -52,6 +67,7 @@ namespace StockMarket.Domain
             order.CancelOrder();
             return orderId;
         }
+
         internal long Enqueue(TradeSide side, decimal quantity, decimal price)
         {
             Interlocked.Increment(ref lastOrderId);
@@ -100,7 +116,7 @@ namespace StockMarket.Domain
                 if (peekTargetOrder.Quantity == 0) matchingOrders.Dequeue();
             }
             if (order.Quantity > 0) Orders.Enqueue(order, order);
-        }
+        }   
         private static (Order SellOrder, Order BuyOrder) findOrders(Order order1, Order order2)
         {
             if (order1.Side == TradeSide.Buy)
@@ -109,7 +125,6 @@ namespace StockMarket.Domain
             }
             return (order1, order2);
         }
-
 
     }
 }

@@ -28,6 +28,11 @@
             throw new NotImplementedException();
         }
 
+        public virtual long ModifyOrder(long orderId, decimal quantity, decimal price)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual void OpenMarket()
         {
             throw new NotImplementedException();

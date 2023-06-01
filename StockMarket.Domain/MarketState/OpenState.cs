@@ -21,5 +21,10 @@
         {
             return stockMarketProcessor.Cancel(orderId);
         }
+
+        public override long ModifyOrder(long orderId, decimal quantity, decimal price)
+        {
+            return stockMarketProcessor.Modify(orderId,quantity,price);
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace StockMarket.Domain.MarketState
+﻿using System.Drawing;
+
+namespace StockMarket.Domain.MarketState
 {
     internal class CloseState : MarketState
     {
@@ -23,6 +25,11 @@
         public override long CancelOrder(long orderId)
         {
             return base.CancelOrder(orderId);
+        }
+
+        public override long ModifyOrder(long orderId, decimal quantity, decimal price)
+        {
+            return base.ModifyOrder(orderId, quantity, price);
         }
     }
 }

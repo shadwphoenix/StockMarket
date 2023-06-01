@@ -13,7 +13,6 @@
 
         public long sellOrderId { get; }
         private long buyOrderId { get; }
-        public long IdBuy { get; }
         public decimal Quantity { get; }
         public decimal Price { get; }
         public long Id { get; }

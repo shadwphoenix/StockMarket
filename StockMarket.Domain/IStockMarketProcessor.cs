@@ -9,5 +9,6 @@
         void CloseMarket();
         void OpenMarket();
         long EnqueueOrder(TradeSide side, decimal quantity, decimal price);
+        long ModifyOrder(long orderId, decimal quantity, decimal price);
     }
 }

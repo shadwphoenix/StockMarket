@@ -8,13 +8,18 @@ namespace StockMarket.Domain.Test
 {
     public class StockMarketProcessorTest
     {
+        StockMarketProcessor sut; // System Under Test
+
+        public StockMarketProcessorTest()
+        {
+            sut = new StockMarketProcessor();
+            sut.OpenMarket();
+        }
 
         [Fact]
         public void EnqueueOrder_Should_Process_SellOrder_When_BuyOrder_Is_Already_Enqueued_Test()
         {
             //Arrange
-
-            var sut = new StockMarketProcessor();// sut = System Under Test
             var buyOrderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
 
             //Act
@@ -52,7 +57,6 @@ namespace StockMarket.Domain.Test
         {
             //Arrange
 
-            var sut = new StockMarketProcessor();
             sut.EnqueueOrder(side: TradeSide.Sell, quantity: 1, price: 1400);
 
             //Act
@@ -69,7 +73,6 @@ namespace StockMarket.Domain.Test
         public void EnqueueOrder_Should_Process_SellOrder_With_The_Highest_Price_BuyOrder_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             var buyOrderId1 = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 3, price: 1500);
             var buyOrderId2 = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 3, price: 1600);
 
@@ -94,7 +97,6 @@ namespace StockMarket.Domain.Test
         public void EnqueueOrder_Should_Process_BuyOrder_With_Lowest_Price_SellOrder_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             var sellOrderId1 = sut.EnqueueOrder(side: TradeSide.Sell, quantity: 3, price: 1500);
             var sellOrderId2 = sut.EnqueueOrder(side: TradeSide.Sell, quantity: 3, price: 1600);
 
@@ -119,7 +121,6 @@ namespace StockMarket.Domain.Test
         public void CancelOrder_Should_Cancel_Order_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             var orderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
 
             //Act
@@ -139,7 +140,6 @@ namespace StockMarket.Domain.Test
         public void EnqueueOrder_Should_Not_Process_Order_When_Order_Is_Canceled_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             var canceledOrderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
             sut.CancelOrder(canceledOrderId);
 
@@ -154,7 +154,6 @@ namespace StockMarket.Domain.Test
         public void EnqueueOrder_Should_Not_Work_When_StockMarket_Is_Closed_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             sut.CloseMarket();
 
             //Act
@@ -168,7 +167,6 @@ namespace StockMarket.Domain.Test
         public void CancelOrder_Should_Not_Work_When_Stockmarket_Is_Closed_Test()
         {
             //Arrange
-            var sut = new StockMarketProcessor();
             var order = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
             sut.CloseMarket();
 
@@ -178,19 +176,55 @@ namespace StockMarket.Domain.Test
             //Assert
             Assert.Throws<NotImplementedException>(act);
         }
-        /*
+        
         [Fact]
         public void Modify_Order_Price_And_Quantity_Test()
         {
             // buy order o sell order dare ke ba ham match nemishan baadesh
             // yeki ro taghir mide ke ba ham badesh trade konan :))
+
+            //Arrange
+            var orderId = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1600);
+            var sellOrder = sut.EnqueueOrder(side: TradeSide.Sell, quantity: 1, price: 1700);
+
+            //Act
+            sut.ModifyOrder(orderId , quantity: 1,price:1800);
+
+            //Assert
+            Assert.Equal(3,sut.Orders.Count());
+            sut.Orders.First().Should().BeEquivalentTo(new
+            {
+                Side = TradeSide.Buy,
+                Quantity = 1M,
+                Price = 1600M,
+                IsCanceled = true
+            });
+
+            sut.Orders.Skip(2).First().Should().BeEquivalentTo(new
+            {
+                Side = TradeSide.Buy,
+                Quantity = 0M,
+                Price = 1800M,
+                IsCanceled = false
+            });
+
+
         }
 
         [Fact]
         public void Modify_Order_Should_Not_Work_When_StockMarket_Is_Closed()
         {
+            //Arrange
+            var order = sut.EnqueueOrder(side: TradeSide.Buy, quantity: 1, price: 1500);
+            sut.CloseMarket();
+
+            //Act
+            void act() => sut.ModifyOrder(order,quantity: 1, price: 1400);
+
+            //Assert
+            Assert.Throws<NotImplementedException>(act);
 
         }
-        */
+        
     }
 }
